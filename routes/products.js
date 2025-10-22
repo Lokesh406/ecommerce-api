@@ -1,4 +1,4 @@
-// routes/products.js
+
 const express = require('express');
 const router = express.Router();
 
@@ -7,25 +7,60 @@ let products = [
   { id: 2, name: 'Car', price: 100000 },
   { id: 3, name: 'Bus', price: 100000 },
   { id: 4, name: 'Ship', price: 100000 },
-  { id: 5, name: 'Lorry', price: 100000 },
+  { id: 5, name: 'Lorry', price: 100000 }
 ];
 
 // GET /products → Send all products
 router.get('/', (req, res) => {
-  res.json(products);
+  res.status(200).json({
+    success: true,
+    count: products.length,
+    data: products
+  });
 });
 
 // POST /products → Add new product
 router.post('/', (req, res) => {
-  const newProduct = req.body;
-  if (!newProduct.name || !newProduct.price) {
-    return res.status(400).json({ message: 'Name and price are required' });
+  // ✅ First, ensure the body exists
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Request body is missing or invalid. Make sure Content-Type is application/json.'
+    });
   }
 
-  newProduct.id = products.length + 1;
+  const { name, price } = req.body;
+
+  // ✅ Validate fields
+  if (!name || price == null) {
+    return res.status(400).json({ success: false, message: 'Name and price are required.' });
+  }
+
+  if (typeof price !== 'number' || price <= 0) {
+    return res.status(400).json({ success: false, message: 'Price must be a positive number.' });
+  }
+
+  // ✅ Prevent duplicate product names
+  const existingProduct = products.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if (existingProduct) {
+    return res.status(409).json({ success: false, message: 'Product with this name already exists.' });
+  }
+
+  // ✅ Create new product
+  const newProduct = {
+    id: products.length ? products[products.length - 1].id + 1 : 1,
+    name,
+    price
+  };
+
   products.push(newProduct);
 
-  res.status(201).json({ message: 'Product added successfully', product: newProduct });
+  res.status(201).json({
+    success: true,
+    message: '✅ Product added successfully!',
+    product: newProduct,
+    allProducts: products
+  });
 });
 
 module.exports = router;
