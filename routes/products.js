@@ -19,9 +19,7 @@ router.get('/', (req, res) => {
   });
 });
 
-// POST /products → Add new product
 router.post('/', (req, res) => {
-  // ✅ First, ensure the body exists
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).json({
       success: false,
@@ -31,7 +29,6 @@ router.post('/', (req, res) => {
 
   const { name, price } = req.body;
 
-  // ✅ Validate fields
   if (!name || price == null) {
     return res.status(400).json({ success: false, message: 'Name and price are required.' });
   }
@@ -40,13 +37,11 @@ router.post('/', (req, res) => {
     return res.status(400).json({ success: false, message: 'Price must be a positive number.' });
   }
 
-  // ✅ Prevent duplicate product names
   const existingProduct = products.find(p => p.name.toLowerCase() === name.toLowerCase());
   if (existingProduct) {
     return res.status(409).json({ success: false, message: 'Product with this name already exists.' });
   }
 
-  // ✅ Create new product
   const newProduct = {
     id: products.length ? products[products.length - 1].id + 1 : 1,
     name,
@@ -57,7 +52,7 @@ router.post('/', (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: '✅ Product added successfully!',
+    message: ' Product added successfully!',
     product: newProduct,
     allProducts: products
   });
